@@ -1,16 +1,12 @@
 var ghost;
 var enemies;
+var goals;
 const color = getRandColor(5);
 var SCENE_W = window.innerWidth;
 var SCENE_H = window.innerHeight;
 
 function setup() {
-  document.body.style.backgroundColor = "rgb(" + color.join(",") + ")";
-  createCanvas(SCENE_W, SCENE_H);
-  createGhost();
-  createEnemies();
-  createGoal();
-  createAnimations();
+  init()
 }
 
 function draw() {
@@ -21,10 +17,14 @@ function draw() {
   enemies.draw();
   enemies.bounce(ghost, explode);
   enemies.bounce(enemies);
+  goals.draw();
+  goals.bounce(enemies);
   drawSprite(ghost);
   shadowGhost();
   mouseIsPressed ? camera.zoom = .4 : camera.zoom = .75;
   checkMargins();
+  checkEnemies();
+  checkGoals();
 }
 
 function getRandColor(brightness){
@@ -67,13 +67,16 @@ function createEnemies() {
     var enemy = createSprite(random(0, SCENE_W), random(0, SCENE_H));
     enemy.addAnimation("normal", "/images/asterisk_stretching0001.png","/images/asterisk_stretching0008.png");
     enemy.friction = .98;
-    enemy.addAnimation("explode", "/images/asterisk_explode0001.png","/images/asterisk_explode0011.png");
     enemies.add(enemy);
   }
 }
 
 function explode(enemy1, ghost) {
-  enemy1.changeAnimation("explode")
+  setTimeout(function() {
+    enemy1.addAnimation("explode", "/images/asterisk_explode0001.png","/images/asterisk_explode0011.png")
+    enemy1.changeAnimation("explode")
+    enemy1.setCollider("circle", 0, 0, 120, 120);
+  }, 1000)
 }
 
 function createAnimations() {
@@ -100,6 +103,55 @@ function checkMargins() {
   }
 }
 
-function createGoal() {
-  
+function createGoals() {
+  goals = new Group()
+  for (var i = 0; i < 2; i++) {
+    goal = createSprite(random(0, SCENE_W), random(0, SCENE_H));
+    goal.addAnimation("goal", "/images/bubbly0001.png", "/images/bubbly0004.png");
+    goals.add(goal);
+  }
+}
+
+function checkGoals() {
+  if (goals.length > 0) {
+    for (var i = 0; i < goals.length; i++) {
+      checkGoal(goals[i]);
+    }
+  } else {
+    victory();
+  }
+}
+
+function checkGoal(goal) {
+  if (goal.overlap(ghost)) goal.remove();
+}
+
+function victory() {
+  //victoryMessage() //composed of platforms?
+  //click to reset all sprites and run setup functions again
+  for (var i = 0; i < allSprites.length; i++) {
+    allSprites[i].remove()
+  }
+  init();
+}
+
+function checkEnemies() {
+  for (var i = 0; i < enemies.length; i++) {
+    checkEnemy(enemies[i])
+  }
+}
+
+function checkEnemy(enemy) {
+  if (enemy.displace(ghost) && enemy.getAnimationLabel() == "explode") {
+    victory();
+  }
+}
+
+function init() {
+  document.body.style.backgroundColor = "rgb(" + color.join(",") + ")";
+  createCanvas(SCENE_W, SCENE_H);
+  createGhost();
+  createEnemies();
+  createGoals();
+  createAnimations();
 }
