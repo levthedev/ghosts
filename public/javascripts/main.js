@@ -1,26 +1,23 @@
 var ghost;
-var MARGIN = 40;
-const color = getRandColor(5);
 var bg;
+const color = getRandColor(5);
 var SCENE_W = window.innerWidth * 4;
 var SCENE_H = window.innerHeight * 4;
-
 
 function setup() {
   document.body.style.backgroundColor = "rgb(" + color.join(",") + ")";
   createCanvas(window.innerWidth, window.innerHeight);
   ghost = createSprite(600, 200, 50, 100);
   var ghostAnimation = ghost.addAnimation("thrust", "/images/ghost_standing0001.png", "/images/ghost_standing0007.png");
-  ghostAnimation.offY = 18
   ghost.maxSpeed = 6;
   ghost.friction = .98;
   ghost.setCollider("circle", 0,0, 20);
   bg = new Group();
 
   for(var i=0; i<80; i++) {
-    var rock = createSprite(random(-width, SCENE_W+width), random(-height, SCENE_H+height));
-    rock.addAnimation("normal", "/images/rocks"+i%3+".png");
-    bg.add(rock);
+    var enemy = createSprite(random(-width, SCENE_W+width), random(-height, SCENE_H+height));
+    enemy.addAnimation("normal", "/images/asterisk_explode0001.png","/images/asterisk_explode0011.png");
+    bg.add(enemy);
   }
 }
 
@@ -30,11 +27,12 @@ function draw() {
   camera.position.x = ghost.position.x;
   camera.position.y = ghost.position.y;
   checkMargins()
-  drawSprites(bg);
+  bg.draw();
   noStroke();
   fill(0,0,0,20);
   ellipse(ghost.position.x, ghost.position.y+90, 80, 30);
   drawSprite(ghost);
+  ghost.bounce(bg)
 }
 
 function getRandColor(brightness){
@@ -45,17 +43,14 @@ function getRandColor(brightness){
   }
 
 function move() {
-  if(keyDown(LEFT_ARROW))
-    ghost.rotation -= 4;
-  if(keyDown(RIGHT_ARROW))
-    ghost.rotation += 4;
-  if(keyDown(UP_ARROW))
-    {
+  if(keyDown(LEFT_ARROW)) ghost.rotation -= 4;
+  if(keyDown(RIGHT_ARROW)) ghost.rotation += 4;
+  if(keyDown(UP_ARROW)) {
     ghost.addSpeed(.5, ghost.rotation - 90);
     ghost.changeAnimation("thrust");
-    }
-  else
+  } else {
     ghost.changeAnimation("normal");
+  }
 }
 
 function checkMargins() {
