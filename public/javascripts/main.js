@@ -17,6 +17,7 @@ function setup() {
   for(var i=0; i<80; i++) {
     var enemy = createSprite(random(-width, SCENE_W+width), random(-height, SCENE_H+height));
     enemy.addAnimation("normal", "/images/asterisk_explode0001.png","/images/asterisk_explode0011.png");
+    enemy.friction = .98
     bg.add(enemy);
   }
 }
